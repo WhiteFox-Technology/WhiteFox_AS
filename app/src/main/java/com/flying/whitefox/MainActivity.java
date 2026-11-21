@@ -1,10 +1,8 @@
 package com.flying.whitefox;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 
-import com.flying.whitefox.service.MusicService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +12,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.flying.whitefox.databinding.ActivityMainBinding;
-import com.flying.whitefox.utils.permission.PermissionManager;
+import com.flying.whitefox.framework.utils.permission.PermissionManager;
 
 import java.util.List;
 

@@ -18,6 +18,7 @@ public class PlaylistData implements Serializable {
         public String ar_name;  // 艺术家名称
         public String al_name;  // 专辑名称
         public String pic;      // 专辑图片URL
+        public String url;      // 歌曲URL
 
         // Getters and setters
         public String getId() {
@@ -58,6 +59,14 @@ public class PlaylistData implements Serializable {
 
         public void setPic(String pic) {
             this.pic = pic;
+        }
+        
+        public String getUrl() {
+            return url;
+        }
+        
+        public void setUrl(String url) {
+            this.url = url;
         }
     }
 

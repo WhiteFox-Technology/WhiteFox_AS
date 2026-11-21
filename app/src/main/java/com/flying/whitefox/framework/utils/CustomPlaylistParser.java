@@ -1,4 +1,4 @@
-package com.flying.whitefox.utils;
+package com.flying.whitefox.framework.utils;
 
 import android.util.Log;
 

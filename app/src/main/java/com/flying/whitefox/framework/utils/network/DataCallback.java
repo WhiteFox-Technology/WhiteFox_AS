@@ -1,4 +1,4 @@
-package com.flying.whitefox.utils.network;
+package com.flying.whitefox.framework.utils.network;
 
 public interface DataCallback<T> {
     void onSuccess(T data);

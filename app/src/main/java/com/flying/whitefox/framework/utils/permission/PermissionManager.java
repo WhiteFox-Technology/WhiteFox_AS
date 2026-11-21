@@ -1,4 +1,4 @@
-package com.flying.whitefox.utils.permission;
+package com.flying.whitefox.framework.utils.permission;
 
 import android.Manifest;
 import android.annotation.SuppressLint;

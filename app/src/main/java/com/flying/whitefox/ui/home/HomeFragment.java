@@ -17,7 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.flying.whitefox.R;
 import com.flying.whitefox.data.model.home.GridItemData;
 import com.flying.whitefox.data.model.home.NavDataResponse;
-import com.flying.whitefox.utils.network.NetworkManager;
+import com.flying.whitefox.framework.utils.network.NetworkManager;
 import com.flying.whitefox.databinding.FragmentHomeBinding;
 import com.flying.whitefox.ui.webview.WebViewActivity;
 

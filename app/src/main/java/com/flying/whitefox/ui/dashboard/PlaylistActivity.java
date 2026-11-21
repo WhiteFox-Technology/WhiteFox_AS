@@ -51,15 +51,22 @@ public class PlaylistActivity extends AppCompatActivity {
         int currentSongIndex = getIntent().getIntExtra(EXTRA_CURRENT_SONG_INDEX, 0);
 
         if (playlist != null && playlist.songs != null) {
-            PlaylistAdapter adapter = new PlaylistAdapter(playlist.songs, currentSongIndex, new PlaylistAdapter.OnSongClickListener() {
-                @Override
-                public void onSongClick(PlaylistData.Song song, int position) {
-                    playSong(position);
-                }
-            });
+
+            PlaylistAdapter adapter = new PlaylistAdapter(playlist.songs, currentSongIndex, (song, position) -> playSong(position));
             recyclerView.setAdapter(adapter);
+
+            // 自动滚动到当前播放的歌曲位置
+            if (currentSongIndex >= 0 && currentSongIndex < playlist.songs.size()) {
+                recyclerView.post(() -> {
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    if (layoutManager != null) {
+                        layoutManager.scrollToPositionWithOffset(currentSongIndex, 0);
+                    }
+                });
+            }
         }
     }
+
 
     private void setupListeners() {
         btnClose.setOnClickListener(v -> finish());

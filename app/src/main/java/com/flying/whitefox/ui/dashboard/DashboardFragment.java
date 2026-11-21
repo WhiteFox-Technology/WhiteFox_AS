@@ -25,7 +25,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.flying.whitefox.R;
 import com.flying.whitefox.data.model.music.PlaylistData;
-import com.flying.whitefox.data.model.music.SongData;
 import com.flying.whitefox.service.MusicPlaybackManager;
 import com.flying.whitefox.data.model.music.PlayMode;
 import com.squareup.picasso.Picasso;
@@ -96,7 +95,7 @@ public class DashboardFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
         View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
-
+        Log.d(TAG, "onCreateView");
         initViews(root);
         setupListeners();
         setupActivityResultLaunchers(); // 初始化Activity Result Launchers
@@ -135,8 +134,10 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onError(String error) {
                 if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
-                    getActivity().runOnUiThread(() ->
-                            Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show());
+                    getActivity().runOnUiThread(() -> {
+                        Log.e(TAG, "播放错误：" + error);
+                        Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                    });
                 }
             }
         });
@@ -146,6 +147,7 @@ public class DashboardFragment extends Fragment {
             musicPlaybackManager.loadPlaylist(PlaylistId, false); // 首次加载不强制刷新
         }
         initSongInfoToUI();
+        Log.d(TAG, "initSongInfoToUI");
         return root;
     }
 
@@ -169,30 +171,27 @@ public class DashboardFragment extends Fragment {
     private void initSongInfoToUI() {
         // 当Fragment重新创建时，获取当前播放状态
         if (musicPlaybackManager != null) {
-            // 延迟一小段时间以确保服务连接完成
-            new Handler().postDelayed(() -> {
-                // 获取当前播放列表
-                PlaylistData currentPlaylist = musicPlaybackManager.getCurrentPlaylist();
-                if (currentPlaylist != null) {
-                    handlePlaylistLoaded(currentPlaylist);
+            // 获取当前播放列表
+            PlaylistData currentPlaylist = musicPlaybackManager.getCurrentPlaylist();
+            if (currentPlaylist != null) {
+                handlePlaylistLoaded(currentPlaylist);
 
-                    // 获取当前播放的歌曲索引
-                    int currentSongIndex = musicPlaybackManager.getCurrentSongIndex();
-                    if (currentSongIndex >= 0 && currentPlaylist.songs != null &&
-                            currentSongIndex < currentPlaylist.songs.size()) {
-                        updateSongInfo(currentPlaylist.songs.get(currentSongIndex));
-                    }
-                } else {
-                    // 如果没有播放列表，加载默认播放列表
-                    // 排除正在播放的情况下，被刷新了时，重新加载
-                    if (playlist == null || playlist.songs == null || playlist.songs.isEmpty()) {
-                        musicPlaybackManager.loadPlaylist(PlaylistId, false); // 首次加载不强制刷新
-                    }
+                // 获取当前播放的歌曲索引
+                int currentSongIndex = musicPlaybackManager.getCurrentSongIndex();
+                if (currentSongIndex >= 0 && currentPlaylist.songs != null &&
+                        currentSongIndex < currentPlaylist.songs.size()) {
+                    updateSongInfo(currentPlaylist.songs.get(currentSongIndex));
                 }
+            } else {
+                // 如果没有播放列表，加载默认播放列表
+                // 排除正在播放的情况下，被刷新了时，重新加载
+                if (playlist == null || playlist.songs == null || playlist.songs.isEmpty()) {
+                    musicPlaybackManager.loadPlaylist(PlaylistId, false); // 首次加载不强制刷新
+                }
+            }
 
-                // 更新播放状态（播放/暂停按钮等）
-                musicPlaybackManager.updatePlaybackState();
-            }, 500);
+            // 更新播放状态（播放/暂停按钮等）
+            musicPlaybackManager.updatePlaybackState();
         }
     }
 
@@ -266,30 +265,33 @@ public class DashboardFragment extends Fragment {
 
     @SuppressLint("SetTextI18n")
     private void updateUIWithPlaybackState(MusicPlaybackManager.PlaybackState state) {
-        if (btnPlayPause != null) {
-            if (state.isPlaying) {
-                btnPlayPause.setImageResource(android.R.drawable.ic_media_pause);
-            } else {
-                btnPlayPause.setImageResource(android.R.drawable.ic_media_play);
+        if (!isAdded() || getActivity() == null || getActivity().isFinishing() || !isResumed()) {
+            return;
+        }
+        
+        try {
+            if (btnPlayPause != null) {
+                if (state.isPlaying) {
+                    btnPlayPause.setImageResource(android.R.drawable.ic_media_pause);
+                } else {
+                    btnPlayPause.setImageResource(android.R.drawable.ic_media_play);
+                }
             }
-        }
 
-        // 只有在进度有效时才更新进度条
-        if (state.duration > 0) {
-            progressBar.setMax(state.duration);
-            progressBar.setProgress(state.currentPosition);
-            updateCurrentTimeText(state.currentPosition);
-            updateTotalTimeText(state.duration);
-        } else {
-            // 如果没有有效的持续时间，重置进度条
-            progressBar.setProgress(0);
-            currentTime.setText("00:00");
-        }
+            // 只有在进度有效时才更新进度条
+            if (state.duration > 0) {
+                progressBar.setMax((int) state.duration);
+                progressBar.setProgress((int) state.currentPosition);
+                updateCurrentTimeText((int) state.currentPosition);
+                updateTotalTimeText((int) state.duration);
+            } else {
+                // 如果没有有效的持续时间，重置进度条
+                progressBar.setProgress(0);
+                currentTime.setText("00:00");
+            }
 
-        // 如果正在播放，启动进度更新
-        if (state.isPlaying) {
-            progressHandler.removeCallbacks(progressRunnable);
-            progressHandler.postDelayed(progressRunnable, 1000);
+        } catch (Exception e) {
+            Log.e(TAG, "更新UI时发生错误", e);
         }
     }
 
@@ -319,7 +321,7 @@ public class DashboardFragment extends Fragment {
                         // 播放选中的歌曲
                         if (musicPlaybackManager != null) {
                             // 使用MusicPlaybackManager播放歌曲
-                            musicPlaybackManager.playSong(songIndex);
+                            musicPlaybackManager.playCurrentIndexSong(songIndex);
                             if (btnPlayPause != null) {
                                 btnPlayPause.setImageResource(android.R.drawable.ic_media_pause);
                             }
@@ -426,8 +428,17 @@ public class DashboardFragment extends Fragment {
         songTitle.setText(song.getName());
         songArtist.setText(song.getAr_name());
 
-        if (song.getPic() != null && !song.getPic().isEmpty()) {
-            Picasso.get().load(song.getPic()).into(albumCover);
+        // 优化图片加载，避免重复加载相同图片
+        if (albumCover != null && song.getPic() != null && !song.getPic().isEmpty()) {
+            // 可以添加图片URL比较，避免重复加载相同图片
+            Picasso.get()
+                    .load(song.getPic())
+                    .placeholder(R.drawable.ic_default_album_art) // 添加占位图
+                    .error(R.drawable.ic_default_album_art)       // 添加错误图
+                    .into(albumCover);
+        } else if (albumCover != null) {
+            // 没有图片时显示默认图片
+            albumCover.setImageResource(R.drawable.ic_default_album_art);
         }
     }
 
@@ -446,10 +457,11 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        progressHandler.removeCallbacks(progressRunnable);
+        progressHandler.removeCallbacksAndMessages(null); // 移除所有回调和消息
 
         if (musicPlaybackManager != null) {
             musicPlaybackManager.destroy();
+            musicPlaybackManager = null; // 避免内存泄漏
         }
     }
 }

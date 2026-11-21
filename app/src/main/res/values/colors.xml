@@ -7,4 +7,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 添加当前播放歌曲的背景色 -->
+    <color name="current_playing_background">#E3F2FD</color>
 </resources>

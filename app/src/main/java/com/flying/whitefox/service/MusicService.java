@@ -10,8 +10,8 @@ import androidx.annotation.NonNull;
 import com.flying.whitefox.data.model.music.PlaylistData;
 import com.flying.whitefox.data.model.music.QualityLevel;
 import com.flying.whitefox.data.model.music.SongData;
-import com.flying.whitefox.utils.cache.PlaylistCacheManager;
-import com.flying.whitefox.utils.config.RequestURLConfig;
+import com.flying.whitefox.framework.utils.cache.PlaylistCacheManager;
+import com.flying.whitefox.framework.utils.config.RequestURLConfig;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -183,8 +183,8 @@ public class MusicService {
         }
         
         // 使用正确的网易云音乐API URL
-        String url = "https://music.163.com/api/playlist/detail?id=" + playlistId;
-//        String url = "https://whitefox.3yu3.top/wymusiclist.json";
+//        String url = "https://music.163.com/api/playlist/detail?id=" + playlistId;
+        String url = "https://whitefox.3yu3.top/wymusiclist.json";
         Log.i(TAG, "getPlaylist url: " + url + " (attempt " + (retryCount + 1) + ")");
 
         // 构建带有必要请求头的请求
@@ -197,7 +197,7 @@ public class MusicService {
         currentCall = http_client.newCall(request);
         currentCall.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NonNull Call call, IOException e) {
                 // 再次检查请求是否仍然有效
                 if (requestId != currentRequestId) {
                     Log.d(TAG, "请求已过期(onFailure)，ID: " + requestId + ", 当前ID: " + currentRequestId);
@@ -249,7 +249,7 @@ public class MusicService {
                     JSONObject jsonObject = new JSONObject(responseData);
 
                     // 检查返回的数据结构
-                    Log.d(TAG, "Response data: " + responseData.substring(0, Math.min(200, responseData.length())) + "...");
+                    Log.d(TAG, "getPlaylistWithRetry Response data: " + responseData.substring(0, Math.min(200, responseData.length())) + "...");
 
                     // 检查是否服务器繁忙
                     String msg = jsonObject.optString("msg", "");
@@ -416,6 +416,7 @@ public class MusicService {
             future.complete(null);
             return future;
         }
+
         // 尝试多个代理URL
         String[] proxyUrls = {
                 PROXY_URL + "?ids=" + songId + "&level=" + level.getValue() + "&type=json",

@@ -1,4 +1,4 @@
-package com.flying.whitefox.utils.config;
+package com.flying.whitefox.framework.utils.config;
 
 public class RequestURLConfig {
     //// 网易云vip音乐

@@ -1,4 +1,4 @@
-package com.flying.whitefox.utils.network;
+package com.flying.whitefox.framework.utils.network;
 
 import com.flying.whitefox.data.model.home.NavDataResponse;
 import retrofit2.Call;

@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.flying.whitefox.R;
 import com.flying.whitefox.data.model.music.PlaylistData;
-import com.flying.whitefox.utils.CustomPlaylistParser;
-import com.flying.whitefox.utils.cache.PlaylistCacheManager;
+import com.flying.whitefox.framework.utils.CustomPlaylistParser;
+import com.flying.whitefox.framework.utils.cache.PlaylistCacheManager;
 
 public class ImportPlaylistActivity extends AppCompatActivity {
     private EditText etPlaylistData;

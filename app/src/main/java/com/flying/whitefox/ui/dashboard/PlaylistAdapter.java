@@ -1,11 +1,14 @@
 package com.flying.whitefox.ui.dashboard;
 
+import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.flying.whitefox.R;
@@ -35,45 +38,50 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.SongVi
         return new SongViewHolder(view);
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
         PlaylistData.Song song = songs.get(position);
         holder.bind(song, position);
+        
+        // 设置点击事件
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onSongClick(song, position);
+            }
+        });
+        
+        // 高亮显示当前播放的歌曲
+        if (position == currentSongIndex) {
+            holder.itemView.setBackgroundColor(
+                ContextCompat.getColor(holder.itemView.getContext(), R.color.current_playing_background)
+            );
+        } else {
+            holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 
     @Override
     public int getItemCount() {
         return songs != null ? songs.size() : 0;
     }
-
-    public class SongViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvSongName;
-        private TextView tvSongArtist;
-        private View indicator;
-
+    
+    static class SongViewHolder extends RecyclerView.ViewHolder {
+        TextView songTitle;
+        TextView songArtist;
+        // 其他视图组件
+        
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvSongName = itemView.findViewById(R.id.tv_song_name);
-            tvSongArtist = itemView.findViewById(R.id.tv_song_artist);
-            indicator = itemView.findViewById(R.id.indicator);
+            songTitle = itemView.findViewById(R.id.tv_song_name);
+            songArtist = itemView.findViewById(R.id.tv_song_artist);
+            // 初始化其他视图组件
         }
-
+        
         public void bind(PlaylistData.Song song, int position) {
-            tvSongName.setText(song.name);
-            tvSongArtist.setText(song.ar_name);
-
-            // 显示当前播放歌曲的指示器
-            if (position == currentSongIndex) {
-                indicator.setVisibility(View.VISIBLE);
-            } else {
-                indicator.setVisibility(View.GONE);
-            }
-
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onSongClick(song, position);
-                }
-            });
+            songTitle.setText(song.getName());
+            songArtist.setText(song.getAr_name());
+            // 绑定其他数据
         }
     }
 }
